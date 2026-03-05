@@ -84,15 +84,11 @@ class User(Entity):
 
     @property
     def password(self):
-        return
+        return self._password
 
     @password.setter
-    def password(self, password: str):
-        self.hash_password(password)
-
-    def hash_password(self, password):
-        """Hashes the password before storing it."""
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    def password(self, passwd: str):
+        self._password = bcrypt.generate_password_hash(passwd).decode('utf-8')
 
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
