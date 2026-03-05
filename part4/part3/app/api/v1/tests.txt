@@ -1,0 +1,283 @@
+>>> from app import create_app
+>>> app = create_app()
+>>> client = app.test_client()
+
+# =====================================================
+# USERS
+# =====================================================
+
+# POST /api/v1/users/ - Create users
+>>> response = client.post('/api/v1/users/', json={"first_name": "John", "last_name": "Doe", "email": "john@example.com"})
+>>> response.status_code
+201
+>>> user1 = response.get_json()
+>>> user1['first_name']
+'John'
+>>> user1['last_name']
+'Doe'
+>>> user1['email']
+'john@example.com'
+>>> 'id' in user1
+True
+
+>>> response = client.post('/api/v1/users/', json={"first_name": "Jane", "last_name": "Smith", "email": "jane@example.com"})
+>>> response.status_code
+201
+>>> user2 = response.get_json()
+>>> user2['first_name']
+'Jane'
+
+# POST /api/v1/users/ - Error cases
+>>> response = client.post('/api/v1/users/', json={"first_name": "John", "last_name": "Doe", "email": "john@example.com"})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/users/', json={"first_name": "John", "last_name": "Doe", "email": "invalid-email"})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/users/', json={"first_name": "John"})
+>>> response.status_code
+400
+
+# GET /api/v1/users/ - Retrieve all users
+>>> response = client.get('/api/v1/users/')
+>>> response.status_code
+200
+>>> isinstance(response.get_json(), list)
+True
+>>> len(response.get_json()) == 2
+True
+
+# GET /api/v1/users/<id> - Retrieve user by ID
+>>> response = client.get(f'/api/v1/users/{user1["id"]}')
+>>> response.status_code
+200
+>>> response.get_json()['email']
+'john@example.com'
+
+>>> response = client.get('/api/v1/users/00000000-0000-0000-0000-000000000000')
+>>> response.status_code
+404
+
+# PUT /api/v1/users/<id> - Update user
+>>> response = client.put(f'/api/v1/users/{user1["id"]}', json={"first_name": "Johnny", "last_name": "Doe", "email": "john@example.com"})
+>>> response.status_code
+200
+>>> response.get_json()['first_name']
+'Johnny'
+
+>>> response = client.put(f'/api/v1/users/{user1["id"]}', json={"first_name": "Johnny", "last_name": "Doe", "email": "jane@example.com"})
+>>> response.status_code
+409
+
+>>> response = client.put('/api/v1/users/00000000-0000-0000-0000-000000000000', json={"first_name": "Ghost", "last_name": "User", "email": "ghost@example.com"})
+>>> response.status_code
+404
+
+# =====================================================
+# AMENITIES
+# =====================================================
+
+# POST /api/v1/amenities/ - Create amenities
+>>> response = client.post('/api/v1/amenities/', json={"name": "Wi-Fi"})
+>>> response.status_code
+201
+>>> amenity1 = response.get_json()
+>>> amenity1['name']
+'Wi-Fi'
+>>> 'id' in amenity1
+True
+
+>>> response = client.post('/api/v1/amenities/', json={"name": "Pool"})
+>>> response.status_code
+201
+>>> amenity2 = response.get_json()
+>>> amenity2['name']
+'Pool'
+
+# POST /api/v1/amenities/ - Error cases
+>>> response = client.post('/api/v1/amenities/', json={})
+>>> response.status_code
+400
+
+# GET /api/v1/amenities/ - Retrieve all amenities
+>>> response = client.get('/api/v1/amenities/')
+>>> response.status_code
+200
+>>> isinstance(response.get_json(), list)
+True
+>>> len(response.get_json()) == 2
+True
+
+# GET /api/v1/amenities/<id> - Retrieve amenity by ID
+>>> response = client.get(f'/api/v1/amenities/{amenity1["id"]}')
+>>> response.status_code
+200
+>>> response.get_json()['name']
+'Wi-Fi'
+
+>>> response = client.get('/api/v1/amenities/00000000-0000-0000-0000-000000000000')
+>>> response.status_code
+404
+
+# PUT /api/v1/amenities/<id> - Update amenity
+>>> response = client.put(f'/api/v1/amenities/{amenity1["id"]}', json={"name": "Fiber Wi-Fi"})
+>>> response.status_code
+200
+>>> response.get_json()['message']
+'Amenity updated successfully'
+
+>>> response = client.put('/api/v1/amenities/00000000-0000-0000-0000-000000000000', json={"name": "Ghost"})
+>>> response.status_code
+404
+
+# =====================================================
+# PLACES
+# =====================================================
+
+# POST /api/v1/places/ - Create places
+>>> response = client.post('/api/v1/places/', json={"title": "Cozy Apartment", "description": "Nice place", "price": 100.0, "latitude": 40.7128, "longitude": -74.0060, "owner_id": user1["id"], "amenities": [amenity1["id"]]})
+>>> response.status_code
+201
+>>> place1 = response.get_json()
+>>> place1['title']
+'Cozy Apartment'
+>>> place1['price']
+100.0
+>>> 'id' in place1
+True
+
+# POST /api/v1/places/ - Error cases
+>>> response = client.post('/api/v1/places/', json={"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 40.0, "longitude": -74.0, "owner_id": "00000000-0000-0000-0000-000000000000", "amenities": []})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/places/', json={"title": "Bad Place", "description": "Test", "price": -50.0, "latitude": 40.0, "longitude": -74.0, "owner_id": user1["id"], "amenities": []})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/places/', json={"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 999.0, "longitude": -74.0, "owner_id": user1["id"], "amenities": []})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/places/', json={"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 40.0, "longitude": 999.0, "owner_id": user1["id"], "amenities": []})
+>>> response.status_code
+400
+
+# GET /api/v1/places/ - Retrieve all places
+>>> response = client.get('/api/v1/places/')
+>>> response.status_code
+200
+>>> isinstance(response.get_json(), list)
+True
+>>> len(response.get_json()) == 1
+True
+
+# GET /api/v1/places/<id> - Retrieve place by ID
+>>> response = client.get(f'/api/v1/places/{place1["id"]}')
+>>> response.status_code
+200
+>>> response.get_json()['title']
+'Cozy Apartment'
+
+>>> response = client.get('/api/v1/places/00000000-0000-0000-0000-000000000000')
+>>> response.status_code
+404
+
+# PUT /api/v1/places/<id> - Update place
+>>> response = client.put(f'/api/v1/places/{place1["id"]}', json={"title": "Updated Apartment", "description": "Even nicer", "price": 150.0, "latitude": 40.7128, "longitude": -74.0060, "owner_id": user1["id"], "amenities": []})
+>>> response.status_code
+200
+>>> response.get_json()['message']
+'Place updated successfully'
+
+>>> response = client.put('/api/v1/places/00000000-0000-0000-0000-000000000000', json={"title": "Ghost", "description": "Ghost", "price": 100.0, "latitude": 0.0, "longitude": 0.0, "owner_id": user1["id"], "amenities": []})
+>>> response.status_code
+404
+
+# =====================================================
+# REVIEWS
+# =====================================================
+
+# POST /api/v1/reviews/ - Create reviews
+>>> response = client.post('/api/v1/reviews/', json={"text": "Great place!", "rating": 5, "user_id": user2["id"], "place_id": place1["id"]})
+>>> response.status_code
+201
+>>> review1 = response.get_json()
+>>> review1['text']
+'Great place!'
+>>> review1['rating']
+5
+>>> 'id' in review1
+True
+
+# POST /api/v1/reviews/ - Error cases
+>>> response = client.post('/api/v1/reviews/', json={"text": "Bad review", "rating": 6, "user_id": user2["id"], "place_id": place1["id"]})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/reviews/', json={"text": "Bad review", "rating": 0, "user_id": user2["id"], "place_id": place1["id"]})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/reviews/', json={"text": "Bad review", "rating": 4, "user_id": "00000000-0000-0000-0000-000000000000", "place_id": place1["id"]})
+>>> response.status_code
+400
+
+>>> response = client.post('/api/v1/reviews/', json={"text": "Bad review", "rating": 4, "user_id": user2["id"], "place_id": "00000000-0000-0000-0000-000000000000"})
+>>> response.status_code
+400
+
+# GET /api/v1/reviews/ - Retrieve all reviews
+>>> response = client.get('/api/v1/reviews/')
+>>> response.status_code
+200
+>>> isinstance(response.get_json(), list)
+True
+>>> len(response.get_json()) == 1
+True
+
+# GET /api/v1/reviews/<id> - Retrieve review by ID
+>>> response = client.get(f'/api/v1/reviews/{review1["id"]}')
+>>> response.status_code
+200
+>>> response.get_json()['text']
+'Great place!'
+
+>>> response = client.get('/api/v1/reviews/00000000-0000-0000-0000-000000000000')
+>>> response.status_code
+404
+
+# GET /api/v1/reviews/by_place/<id> - Retrieve reviews by place
+>>> response = client.get(f'/api/v1/reviews/by_place/{place1["id"]}')
+>>> response.status_code
+200
+>>> isinstance(response.get_json(), list)
+True
+>>> len(response.get_json()) == 1
+True
+
+# PUT /api/v1/reviews/<id> - Update review
+>>> response = client.put(f'/api/v1/reviews/{review1["id"]}', json={"text": "Updated review!", "rating": 4})
+>>> response.status_code
+200
+>>> response.get_json()['text']
+'Updated review!'
+>>> response.get_json()['rating']
+4
+
+>>> response = client.put('/api/v1/reviews/00000000-0000-0000-0000-000000000000', json={"text": "Ghost", "rating": 3})
+>>> response.status_code
+404
+
+# DELETE /api/v1/reviews/<id> - Delete review
+>>> response = client.delete(f'/api/v1/reviews/{review1["id"]}')
+>>> response.status_code
+200
+>>> response.get_json()['message']
+'Review deleted successfully'
+
+>>> response = client.delete(f'/api/v1/reviews/{review1["id"]}')
+>>> response.status_code
+404
