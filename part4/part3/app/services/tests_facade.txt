@@ -1,0 +1,303 @@
+>>> from app.services.facade import HBnBFacade
+>>> facade = HBnBFacade()
+
+# =====================================================
+# USERS
+# =====================================================
+
+# create_user - Success
+>>> user1 = facade.create_user({"first_name": "John", "last_name": "Doe", "email": "john@example.com"})
+>>> user1.first_name
+'John'
+>>> user1.last_name
+'Doe'
+>>> user1.email
+'john@example.com'
+>>> isinstance(user1.id, str)
+True
+
+>>> user2 = facade.create_user({"first_name": "Jane", "last_name": "Smith", "email": "jane@example.com"})
+>>> user2.first_name
+'Jane'
+
+# create_user - Error cases
+>>> try:
+...     facade.create_user({"first_name": "", "last_name": "Doe", "email": "bad@example.com"})
+... except ValueError as e:
+...     print(e)
+first_name is required
+
+>>> try:
+...     facade.create_user({"first_name": "John", "last_name": "Doe", "email": "invalid-email"})
+... except ValueError as e:
+...     print(e)
+email format is invalid
+
+>>> try:
+...     facade.create_user({"first_name": "A" * 51, "last_name": "Doe", "email": "long@example.com"})
+... except ValueError as e:
+...     print(e)
+first_name must be at most 50 characters
+
+# get_user - Success
+>>> result = facade.get_user(user1.id)
+>>> result.email
+'john@example.com'
+
+# get_user - Not found
+>>> facade.get_user("00000000-0000-0000-0000-000000000000") is None
+True
+
+# get_user_by_email - Success
+>>> result = facade.get_user_by_email("john@example.com")
+>>> result.first_name
+'John'
+
+# get_user_by_email - Not found
+>>> facade.get_user_by_email("unknown@example.com") is None
+True
+
+# get_all_user
+>>> users = facade.get_all_user()
+>>> len(users) == 2
+True
+
+# update_user - Success
+>>> updated = facade.update_user(user1.id, {"first_name": "Johnny"})
+>>> updated.first_name
+'Johnny'
+
+# update_user - updated_at changes
+>>> import time
+>>> old_updated_at = user1.updated_at
+>>> time.sleep(0.001)
+>>> facade.update_user(user1.id, {"first_name": "Johnny"}) # doctest: +ELLIPSIS
+<app.models.user.User object at ...>
+>>> user1.updated_at > old_updated_at
+True
+
+# =====================================================
+# AMENITIES
+# =====================================================
+
+# create_amenity - Success with description
+>>> amenity1 = facade.create_amenity({"name": "Wi-Fi", "description": "High speed"})
+>>> amenity1.name
+'Wi-Fi'
+>>> amenity1.description
+'High speed'
+>>> isinstance(amenity1.id, str)
+True
+
+# create_amenity - Success without description (defaults to "")
+>>> amenity2 = facade.create_amenity({"name": "Pool"})
+>>> amenity2.name
+'Pool'
+>>> amenity2.description
+''
+
+# create_amenity - Error cases
+>>> try:
+...     facade.create_amenity({"name": ""})
+... except ValueError as e:
+...     print(e)
+name is required
+
+>>> try:
+...     facade.create_amenity({"name": "A" * 51})
+... except ValueError as e:
+...     print(e)
+name must be at most 50 characters
+
+# get_amenity - Success
+>>> result = facade.get_amenity(amenity1.id)
+>>> result.name
+'Wi-Fi'
+
+# get_amenity - Not found
+>>> facade.get_amenity("00000000-0000-0000-0000-000000000000") is None
+True
+
+# get_all_amenities
+>>> amenities = facade.get_all_amenities()
+>>> len(amenities) == 2
+True
+
+# update_amenity - Success
+>>> facade.update_amenity(amenity1.id, {"name": "Fiber Wi-Fi"}) # doctest: +ELLIPSIS
+<app.models.amenity.Amenity object at ...>
+>>> facade.get_amenity(amenity1.id).name
+'Fiber Wi-Fi'
+
+# =====================================================
+# PLACES
+# =====================================================
+
+# create_place - Success
+>>> place1 = facade.create_place({"title": "Cozy Apartment", "description": "Nice place", "price": 100.0, "latitude": 40.7128, "longitude": -74.0060, "owner_id": user1.id, "amenities": [amenity1.id]})
+>>> place1.title
+'Cozy Apartment'
+>>> place1.price
+100.0
+>>> place1.latitude
+40.7128
+>>> place1.owner_id == user1.id
+True
+>>> len(place1.amenities) == 1
+True
+
+# create_place - Invalid owner_id
+>>> try:
+...     facade.create_place({"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 40.0, "longitude": -74.0, "owner_id": "00000000-0000-0000-0000-000000000000", "amenities": []})
+... except ValueError as e:
+...     print(e)
+owner id is not a valid id
+
+# create_place - Invalid amenity_id
+>>> try:
+...     facade.create_place({"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 40.0, "longitude": -74.0, "owner_id": user1.id, "amenities": ["00000000-0000-0000-0000-000000000000"]})
+... except ValueError as e:
+...     print(e)
+amenities id is not a valid id
+
+# create_place - Negative price
+>>> try:
+...     facade.create_place({"title": "Bad Place", "description": "Test", "price": -50.0, "latitude": 40.0, "longitude": -74.0, "owner_id": user1.id, "amenities": []})
+... except ValueError as e:
+...     print(e)
+price must be a positive value
+
+# create_place - Invalid latitude
+>>> try:
+...     facade.create_place({"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 999.0, "longitude": -74.0, "owner_id": user1.id, "amenities": []})
+... except ValueError as e:
+...     print(e)
+latitude must be between -90.0 and 90.0
+
+# create_place - Invalid longitude
+>>> try:
+...     facade.create_place({"title": "Bad Place", "description": "Test", "price": 100.0, "latitude": 40.0, "longitude": 999.0, "owner_id": user1.id, "amenities": []})
+... except ValueError as e:
+...     print(e)
+longitude must be between -180.0 and 180.0
+
+# get_place - Success
+>>> result = facade.get_place(place1.id)
+>>> result.title
+'Cozy Apartment'
+
+# get_place - Not found
+>>> facade.get_place("00000000-0000-0000-0000-000000000000") is None
+True
+
+# get_all_places
+>>> places = facade.get_all_places()
+>>> len(places) == 1
+True
+
+# update_place - Success
+>>> facade.update_place(place1.id, {"title": "Updated Apartment"}) # doctest: +ELLIPSIS
+<app.models.place.Place object at ...>
+>>> facade.get_place(place1.id).title
+'Updated Apartment'
+
+# =====================================================
+# REVIEWS
+# =====================================================
+
+# create_review - Success
+>>> review1 = facade.create_review({"text": "Great place!", "rating": 5, "user_id": user2.id, "place_id": place1.id})
+>>> review1.text
+'Great place!'
+>>> review1.rating
+5
+>>> review1.user.id == user2.id
+True
+>>> review1.place.id == place1.id
+True
+
+# create_review - Invalid user_id
+>>> try:
+...     facade.create_review({"text": "Bad review", "rating": 4, "user_id": "00000000-0000-0000-0000-000000000000", "place_id": place1.id})
+... except ValueError as e:
+...     print(e)
+User not found
+
+# create_review - Invalid place_id
+>>> try:
+...     facade.create_review({"text": "Bad review", "rating": 4, "user_id": user2.id, "place_id": "00000000-0000-0000-0000-000000000000"})
+... except ValueError as e:
+...     print(e)
+Place not found
+
+# create_review - Rating out of bounds
+>>> try:
+...     facade.create_review({"text": "Bad review", "rating": 6, "user_id": user2.id, "place_id": place1.id})
+... except ValueError as e:
+...     print(e)
+rating must be between 1 and 5
+
+>>> try:
+...     facade.create_review({"text": "Bad review", "rating": 0, "user_id": user2.id, "place_id": place1.id})
+... except ValueError as e:
+...     print(e)
+rating must be between 1 and 5
+
+# create_review - Empty text
+>>> try:
+...     facade.create_review({"text": "", "rating": 4, "user_id": user2.id, "place_id": place1.id})
+... except ValueError as e:
+...     print(e)
+text is required
+
+# get_review - Success
+>>> result = facade.get_review(review1.id)
+>>> result.text
+'Great place!'
+
+# get_review - Not found
+>>> facade.get_review("00000000-0000-0000-0000-000000000000") is None
+True
+
+# get_all_reviews
+>>> reviews = facade.get_all_reviews()
+>>> len(reviews) == 1
+True
+
+# get_reviews_by_place - Success
+>>> reviews_by_place = facade.get_reviews_by_place(place1.id)
+>>> len(reviews_by_place) == 1
+True
+>>> reviews_by_place[0].text
+'Great place!'
+
+# get_reviews_by_place - No reviews for unknown place
+>>> reviews_by_place_empty = facade.get_reviews_by_place("00000000-0000-0000-0000-000000000000")
+>>> len(reviews_by_place_empty) == 0
+True
+
+# update_review - Success
+>>> updated = facade.update_review(review1.id, {"text": "Updated review!", "rating": 4})
+>>> updated.text
+'Updated review!'
+>>> updated.rating
+4
+
+# update_review - Blocked fields are ignored
+>>> facade.update_review(review1.id, {"text": "Test", "rating": 3, "user_id": "fake", "place_id": "fake"}) # doctest: +ELLIPSIS
+<app.models.review.Review object at ...>
+>>> facade.get_review(review1.id).user.id == user2.id
+True
+
+# update_review - Not found returns None
+>>> facade.update_review("00000000-0000-0000-0000-000000000000", {"text": "Ghost", "rating": 3}) is None
+True
+
+# delete_review - Success
+>>> facade.delete_review(review1.id)
+>>> facade.get_review(review1.id) is None
+True
+
+# delete_review - Already deleted returns None
+>>> facade.get_review(review1.id) is None
+True
