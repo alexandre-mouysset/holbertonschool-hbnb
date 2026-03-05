@@ -15,6 +15,8 @@ class HBnBFacade:
 # ----- user ----------------------------------
 
     def create_user(self, user_data):
+        if user_data.get('is_admin'):
+            raise ValueError("is_admin key not allowed")
         user = User(**user_data)
         self.user_repo.add(user)
         return user

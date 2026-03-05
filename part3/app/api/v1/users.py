@@ -1,5 +1,4 @@
 from flask_restx import Namespace, Resource, fields
-
 from app.services import facade
 
 api = Namespace("users", description="User operations")
@@ -17,11 +16,20 @@ user_model = api.model(
             required=True, description="Email of the user"
         ),
     },
-    strict=True,
+    strict=True
 )
 
 user_model_response = api.inherit(
     "UserResponse", user_model, {"id": fields.String(description="User ID")}
+)
+
+user_model_register = api.model(
+    "UserRegister",
+    {
+        **user_model,
+        "password": fields.String(required=True)
+    },
+    strict=True
 )
 
 
@@ -34,7 +42,7 @@ class UserList(Resource):
 
     @api.response(400, "Invalid input data")
     @api.response(201, "Account created successfully")
-    @api.expect(user_model, validate=True)
+    @api.expect(user_model_register, validate=True)
     @api.marshal_with(user_model_response)
     def post(self):
         """Create a new user"""
