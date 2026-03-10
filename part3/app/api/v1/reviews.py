@@ -64,7 +64,7 @@ class ReviewList(Resource):
             api.abort(403, "wrong user id")
         for review in facade.get_reviews_by_place(review_data["place_id"]):
             if review.user_id == user_id:
-                api.abort(409, "User already reviewed this place")
+                api.abort(409, "You have already reviewed this place")
         try:
             return facade.create_review(review_data), 201
         except (TypeError, ValueError) as error:

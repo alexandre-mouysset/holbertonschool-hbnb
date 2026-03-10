@@ -104,7 +104,7 @@ class HBnBFacade:
             raise ValueError("Place not found")
 
         if place.owner_id == user.id:
-            raise ValueError("User can\'t review their own place")
+            raise ValueError("You cannot review your own place")
 
         review = Review(
             text=text,
