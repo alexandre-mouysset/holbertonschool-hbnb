@@ -1,5 +1,5 @@
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Namespace, Resource, fields
-
 from app.services import facade
 
 api = Namespace("places", description="Place operations")
@@ -17,27 +17,32 @@ place_model = api.model(
             required=True, description="Latitude of the place"),
         "longitude": fields.Float(
             required=True, description="Longitude of the place"),
-        "owner_id": fields.String(
-            required=True, description="ID of the owner"),
         "amenities": fields.List(
             fields.String, required=True, description="List of amenities ID's"
         ),
     },
 )
 place_model_response = api.inherit(
-    "PlaceResponse", place_model, {"id": fields.String(description="Place ID")}
+    "PlaceResponse", place_model, {
+        "id": fields.String(description="Place ID"),
+        "owner_id": fields.String(description="ID of the owner"),
+    }
 )
 
 
 @api.route('/')
 class PlaceList(Resource):
+    @jwt_required()
+    @api.doc(security='BearerAuth')
     @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Missing or invalid token')
     @api.marshal_with(place_model_response)
     def post(self):
         """Register a new place"""
         place_data = api.payload
+        place_data['owner_id'] = get_jwt_identity()
         try:
             return facade.create_place(place_data), 201
         except (ValueError, TypeError) as error:
@@ -62,16 +67,25 @@ class PlaceResource(Resource):
             return place_data, 200
         api.abort(404, "Place doesn't exist")
 
+    @jwt_required()
+    @api.doc(security='BearerAuth')
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
+    @api.response(403, 'Unauthorized action')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Missing or invalid token')
     def put(self, place_id):
         """Update a place's information"""
         place_data = api.payload
+        current_user_id = get_jwt_identity()
 
-        if not facade.get_place(place_id):
+        place = facade.get_place(place_id)
+        if not place:
             api.abort(404, "Place doesn't exist")
+
+        if place.owner_id != current_user_id:
+            api.abort(403, "Unauthorized action")
 
         try:
             facade.update_place(place_id, place_data)

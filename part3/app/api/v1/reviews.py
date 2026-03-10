@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app.services import facade
 
@@ -36,9 +37,8 @@ review_model_response = api.model(
         "id": fields.String(description="Review ID"),
         "text": fields.String(description="Text of the review"),
         "rating": fields.Integer(description="Rating value"),
-        "user_id": fields.String(attribute="user.id", description="User ID"),
-        "place_id": fields.String(
-            attribute="place.id", description="Place ID"),
+        "user_id": fields.String(description="User ID"),
+        "place_id": fields.String(description="Place ID"),
     },
 )
 
@@ -52,11 +52,19 @@ class ReviewList(Resource):
 
     @api.response(400, "Invalid input data")
     @api.response(201, "Review created successfully")
+    @api.doc(security='BearerAuth')
     @api.expect(review_model, validate=True)
     @api.marshal_with(review_model_response)
+    @jwt_required()
     def post(self):
         """Create a new review"""
         review_data = api.payload
+        user_id = get_jwt_identity()
+        if review_data['user_id'] != user_id:
+            api.abort(403, "wrong user id")
+        for review in facade.get_reviews_by_place(review_data["place_id"]):
+            if review.user_id == user_id:
+                api.abort(409, "User already reviewed this place")
         try:
             return facade.create_review(review_data), 201
         except (TypeError, ValueError) as error:
@@ -78,23 +86,36 @@ class ReviewResource(Resource):
     @api.response(400, "Invalid input data")
     @api.response(200, "Review updated correctly")
     @api.expect(review_update_model, validate=True)
+    @api.doc(security='BearerAuth')
+    @jwt_required()
     @api.marshal_with(review_model_response)
     def put(self, review_id):
         """Update review text and rating"""
         review_data = api.payload
+        user_id = get_jwt_identity()
+        review = facade.get_review(review_id)
 
-        if not facade.get_review(review_id):
+        if not review:
             api.abort(404, "Review doesn't exist")
+
+        if review.user_id != user_id:
+            api.abort(403, "Unauthorized action")
         try:
             return facade.update_review(review_id, review_data), 200
         except (TypeError, ValueError) as error:
             api.abort(400, str(error))
 
     @api.response(200, "Review deleted correctly")
+    @api.doc(security='BearerAuth')
+    @jwt_required()
     def delete(self, review_id):
         """Delete a review by ID"""
-        if not facade.get_review(review_id):
+        user_id = get_jwt_identity()
+        review = facade.get_review(review_id)
+        if not review:
             api.abort(404, "Review doesn't exist")
+        if review.user_id != user_id:
+            api.abort(403, "Unauthorized action")
         facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200
 
