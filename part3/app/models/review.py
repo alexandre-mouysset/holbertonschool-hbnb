@@ -1,16 +1,14 @@
 from app.models.entity import Entity
-from app.models.place import Place
-from app.models.user import User
 
 
 class Review(Entity):
-    def __init__(self, text: str, rating: int, user: User, place: Place):
+    def __init__(self, text: str, rating: int, user_id: str, place_id: str):
 
         super().__init__()
         self.text = text
         self.rating = rating
-        self.user = user
-        self.place = place
+        self.user_id = user_id
+        self.place_id = place_id
 
     @property
     def text(self):
@@ -50,29 +48,17 @@ class Review(Entity):
         self._rating = value
 
     @property
-    def place(self):
-        return self._place
+    def place_id(self):
+        return self._place_id
 
-    @place.setter
-    def place(self, value):
-
-        if not isinstance(value, Place):
-            raise TypeError("place must be a Place instance")
-
-        if not getattr(value, "id", None):
-            raise ValueError("place must exist and have a valid id")
-        self._place = value
+    @place_id.setter
+    def place_id(self, value):
+        self._place_id = value
 
     @property
-    def user(self):
-        return self._user
+    def user_id(self):
+        return self._user_id
 
-    @user.setter
-    def user(self, value):
-
-        if not isinstance(value, User):
-            raise TypeError("user must be a User instance")
-
-        if not getattr(value, "id", None):
-            raise ValueError("user must exist and have a valid id")
-        self._user = value
+    @user_id.setter
+    def user_id(self, value):
+        self._user_id = value

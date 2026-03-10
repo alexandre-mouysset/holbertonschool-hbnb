@@ -103,11 +103,14 @@ class HBnBFacade:
         if not place:
             raise ValueError("Place not found")
 
+        if place.owner_id == user.id:
+            raise ValueError("User can\'t review their own place")
+
         review = Review(
             text=text,
             rating=rating,
-            user=user,
-            place=place,
+            user_id=user_id,
+            place_id=place_id,
         )
         self.review_repo.add(review)
         return review
@@ -122,7 +125,7 @@ class HBnBFacade:
         return [
             review
             for review in self.review_repo.get_all()
-            if review.place.id == place_id
+            if review.place_id == place_id
         ]
 
     def update_review(self, review_id, review_data):

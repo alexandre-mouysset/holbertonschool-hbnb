@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app.services import facade
 
@@ -52,11 +53,19 @@ class ReviewList(Resource):
 
     @api.response(400, "Invalid input data")
     @api.response(201, "Review created successfully")
+    @api.doc(security='BearerAuth')
     @api.expect(review_model, validate=True)
     @api.marshal_with(review_model_response)
+    @jwt_required()
     def post(self):
         """Create a new review"""
         review_data = api.payload
+        user_id = get_jwt_identity()
+        if review_data['user_id'] != user_id:
+            api.abort(403, "wrong user id")
+        for review in facade.get_reviews_by_place(review_data["place_id"]):
+            if review.user_id == user_id:
+                api.abort(409, "User already reviewed this place")
         try:
             return facade.create_review(review_data), 201
         except (TypeError, ValueError) as error:
