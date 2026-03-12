@@ -62,3 +62,17 @@ python3 -m doctest app/api/v1/tests.txt
 
 
 > **Note:** The application uses an `InMemoryRepository` — all data is lost on server restart.
+pour créer la db local
+```python
+flask shell
+>>> from app import db
+>>> db.create_all()
+```
+et pour mettre un utilisateur admin
+```python
+flask shell
+>>> from app import db
+>>> from app.models.user import User
+>>> User.query.filter_by(email="l'email de l'utilisateur cible").update({'is_admin': True})
+>>> db.session.commit()
+```

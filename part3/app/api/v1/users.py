@@ -131,15 +131,3 @@ class UserResource(Resource):
             return facade.update_user(user_id, user_data), 200
         except ValueError as error:
             api.abort(400, error)
-
-
-@api.route("/get_admin")
-class UserGetAdmin(Resource):
-    @api.expect(user_model_register, validate=True)
-    def post(self):
-        user_data = api.payload
-
-        user = facade.create_user(user_data)
-        user.is_admin = True
-
-        return {"is_admin": user.is_admin, "user id": user.id}
