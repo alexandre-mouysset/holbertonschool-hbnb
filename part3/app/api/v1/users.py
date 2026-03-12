@@ -106,24 +106,11 @@ class UserResource(Resource):
 
 @api.route("/get_admin")
 class UserGetAdmin(Resource):
-    @jwt_required()
-    @api.expect(api.model(
-        "User_Model",
-        {
-            "id": fields.String(description="User ID"),
-            "secret_passwd": fields.String(description="Admin Password")}
-        ), validate=True)
+    @api.expect(user_model_register, validate=True)
     def post(self):
         user_data = api.payload
-        current_user_id = get_jwt_identity()
 
-        if user_data["secret_passwd"] != "chuisadmin":
-            api.abort(403, "Unauthorized action")
-
-        if user_data["id"] != current_user_id:
-            api.abort(403, "Unauthorized action")
-
-        user = facade.get_user(user_data["id"])
+        user = facade.create_user(user_data)
         user.is_admin = True
 
         return { "is_admin": user.is_admin, "user id": user.id }
