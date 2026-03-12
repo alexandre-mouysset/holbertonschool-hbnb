@@ -1,4 +1,4 @@
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
@@ -44,6 +44,16 @@ user_model_update = api.model(
     strict=True
 )
 
+user_model_admin_update = api.model(
+    "UserAdminUpdate",
+    {
+        "first_name": fields.String(description="First name of the user"),
+        "last_name": fields.String(description="Last name of the user"),
+        "email": fields.String(description="Email of the user"),
+        "password": fields.String(description="Password of the user"),
+    }
+)
+
 
 @api.route("/")
 class UserList(Resource):
@@ -52,12 +62,20 @@ class UserList(Resource):
         """Retrieve all users"""
         return facade.get_all_user(), 200
 
+    @jwt_required()
+    @api.doc(security='BearerAuth')
     @api.response(400, "Invalid input data")
     @api.response(201, "Account created successfully")
+    @api.response(401, "Missing or invalid token")
+    @api.response(403, "Admin privileges required")
     @api.expect(user_model_register, validate=True)
     @api.marshal_with(user_model_response)
     def post(self):
-        """Create a new user"""
+        """Create a new user (admin only)"""
+        claims = get_jwt()
+        if not claims.get("is_admin"):
+            api.abort(403, "Admin privileges required")
+
         user_data = api.payload
         if facade.get_user_by_email(user_data["email"]):
             api.abort(400, "Email already registered")
@@ -81,22 +99,33 @@ class UserResource(Resource):
 
     @jwt_required()
     @api.doc(security='BearerAuth')
-    @api.expect(user_model_update, validate=True)
+    @api.expect(user_model_admin_update, validate=True)
     @api.response(200, "User updated correctly")
     @api.response(400, "Invalid input data")
     @api.response(401, "Missing or invalid token")
     @api.response(403, "Unauthorized action")
     @api.marshal_with(user_model_response)
     def put(self, user_id):
-        """Update user information"""
+        """Update user information (admin: all fields; user: own profile,
+        no email/password)"""
         user_data = api.payload
         current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get("is_admin", False)
 
         if not facade.get_user(user_id):
             api.abort(404, "User doesn't exist")
 
-        if current_user_id != user_id:
-            api.abort(403, "Unauthorized action")
+        if not is_admin:
+            if current_user_id != user_id:
+                api.abort(403, "Unauthorized action")
+            if "email" in user_data or "password" in user_data:
+                api.abort(403, "Unauthorized action")
+
+        if "email" in user_data:
+            existing = facade.get_user_by_email(user_data["email"])
+            if existing and existing.id != user_id:
+                api.abort(400, "Email already registered")
 
         try:
             return facade.update_user(user_id, user_data), 200
