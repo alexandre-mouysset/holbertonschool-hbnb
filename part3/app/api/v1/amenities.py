@@ -1,3 +1,4 @@
+from flask_jwt_extended import get_jwt, jwt_required
 from flask_restx import Namespace, Resource, fields
 
 from app.services import facade
@@ -7,8 +8,7 @@ api = Namespace("amenities", description="Amenities operations")
 amenity_model = api.model(
     "AmenityModel",
     {
-        "name": fields.String(
-            required=True, description="Name of the amenity"),
+        "name": fields.String(required=True, description="Name of the amenity"),
         "description": fields.String(
             required=False, description="Description of the amenity"
         ),
@@ -17,8 +17,7 @@ amenity_model = api.model(
 )
 
 amenity_model_response = api.inherit(
-    "AmenityResponse", amenity_model,
-    {"id": fields.String(description="Amenity ID")}
+    "AmenityResponse", amenity_model, {"id": fields.String(description="Amenity ID")}
 )
 
 
@@ -29,6 +28,7 @@ class AmenityList(Resource):
         """Retrieve all amenities"""
         return facade.get_all_amenities(), 200
 
+    @jwt_required()
     @api.response(400, "Invalid input data")
     @api.response(201, "Amenity created successfully")
     @api.expect(amenity_model, validate=True)
@@ -36,6 +36,8 @@ class AmenityList(Resource):
     def post(self):
         """Create a new amenity"""
         amenity_data = api.payload
+        if not get_jwt().get("is_admin"):
+            api.abort(403, "Admin privileges required")
         try:
             return facade.create_amenity(amenity_data), 201
         except ValueError as error:
@@ -54,12 +56,16 @@ class AmenityResource(Resource):
             return amenity_data, 200
         api.abort(404, "Amenity doesn't exist")
 
+    @jwt_required()
     @api.response(400, "Invalid input data")
     @api.response(200, "Amenity updated correctly")
     @api.expect(amenity_model, validate=True)
     def put(self, amenity_id):
         """Update amenity information"""
         amenity_data = api.payload
+
+        if not get_jwt().get("is_admin"):
+            api.abort(403, "Admin privileges required")
 
         if not facade.get_amenity(amenity_id):
             api.abort(404, "Amenity doesn't exist")

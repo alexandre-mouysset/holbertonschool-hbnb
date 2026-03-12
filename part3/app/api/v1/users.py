@@ -113,4 +113,4 @@ class UserGetAdmin(Resource):
         user = facade.create_user(user_data)
         user.is_admin = True
 
-        return { "is_admin": user.is_admin, "user id": user.id }
+        return {"is_admin": user.is_admin, "user id": user.id}
