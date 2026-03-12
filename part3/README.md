@@ -68,11 +68,11 @@ flask shell
 >>> from app import db
 >>> db.create_all()
 ```
-et pour mettre un utilisateur admin
+et pour créer un utilisateur admin
 ```python
 flask shell
->>> from app import db
->>> from app.models.user import User
->>> User.query.filter_by(email="l'email de l'utilisateur cible").update({'is_admin': True})
->>> db.session.commit()
+>>> from app.services.facade import HBnBFacade
+>>> facade = HBnBFacade()
+>>> user = facade.create_user({'first_name':'John','last_name':'Doe','email':'john@example.com','password':'password'})
+>>> print(user.id)
 ```
