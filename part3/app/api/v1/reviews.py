@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 
 from app.services import facade
 
@@ -60,8 +60,12 @@ class ReviewList(Resource):
         """Create a new review"""
         review_data = api.payload
         user_id = get_jwt_identity()
-        if review_data['user_id'] != user_id:
-            api.abort(403, "wrong user id")
+        user_data = get_jwt()
+
+        if not user_data.get("is_admin"):
+            if review_data['user_id'] != user_id:
+                api.abort(403, "wrong user id")
+
         for review in facade.get_reviews_by_place(review_data["place_id"]):
             if review.user_id == user_id:
                 api.abort(409, "You have already reviewed this place")
@@ -94,12 +98,14 @@ class ReviewResource(Resource):
         review_data = api.payload
         user_id = get_jwt_identity()
         review = facade.get_review(review_id)
+        user_data = get_jwt()
 
         if not review:
             api.abort(404, "Review doesn't exist")
 
-        if review.user_id != user_id:
-            api.abort(403, "Unauthorized action")
+        if not user_data.get("is_admin"):
+            if review.user_id != user_id:
+                api.abort(403, "Unauthorized action")
         try:
             return facade.update_review(review_id, review_data), 200
         except (TypeError, ValueError) as error:
@@ -112,10 +118,13 @@ class ReviewResource(Resource):
         """Delete a review by ID"""
         user_id = get_jwt_identity()
         review = facade.get_review(review_id)
+        user_data = get_jwt()
+
         if not review:
             api.abort(404, "Review doesn't exist")
-        if review.user_id != user_id:
-            api.abort(403, "Unauthorized action")
+        if not user_data.get("is_admin"):
+            if review.user_id != user_id:
+                api.abort(403, "Unauthorized action")
         facade.delete_review(review_id)
         return {"message": "Review deleted successfully"}, 200
 
