@@ -1,5 +1,6 @@
-from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from flask_restx import Namespace, Resource, fields
+
 from app.services import facade
 
 api = Namespace("users", description="User operations")
@@ -10,14 +11,10 @@ user_model = api.model(
         "first_name": fields.String(
             required=True, description="First name of the user"
         ),
-        "last_name": fields.String(
-            required=True, description="Last name of the user"
-        ),
-        "email": fields.String(
-            required=True, description="Email of the user"
-        ),
+        "last_name": fields.String(required=True, description="Last name of the user"),
+        "email": fields.String(required=True, description="Email of the user"),
     },
-    strict=True
+    strict=True,
 )
 
 user_model_response = api.inherit(
@@ -26,22 +23,19 @@ user_model_response = api.inherit(
 
 user_model_register = api.model(
     "UserRegister",
-    {
-        **user_model,
-        "password": fields.String(required=True)
-    },
-    strict=True
+    {**user_model, "password": fields.String(required=True)},
+    strict=True,
 )
 
 user_model_update = api.model(
     "UserUpdate",
     {
-        "first_name": fields.String(required=True,
-                                    description="First name of the user"),
-        "last_name": fields.String(required=True,
-                                   description="Last name of the user"),
+        "first_name": fields.String(
+            required=True, description="First name of the user"
+        ),
+        "last_name": fields.String(required=True, description="Last name of the user"),
     },
-    strict=True
+    strict=True,
 )
 
 user_model_admin_update = api.model(
@@ -51,7 +45,7 @@ user_model_admin_update = api.model(
         "last_name": fields.String(description="Last name of the user"),
         "email": fields.String(description="Email of the user"),
         "password": fields.String(description="Password of the user"),
-    }
+    },
 )
 
 
@@ -63,7 +57,7 @@ class UserList(Resource):
         return facade.get_all_user(), 200
 
     @jwt_required()
-    @api.doc(security='BearerAuth')
+    @api.doc(security="BearerAuth")
     @api.response(400, "Invalid input data")
     @api.response(201, "Account created successfully")
     @api.response(401, "Missing or invalid token")
@@ -98,7 +92,7 @@ class UserResource(Resource):
         api.abort(404, "User doesn't exist")
 
     @jwt_required()
-    @api.doc(security='BearerAuth')
+    @api.doc(security="BearerAuth")
     @api.expect(user_model_admin_update, validate=True)
     @api.response(200, "User updated correctly")
     @api.response(400, "Invalid input data")
