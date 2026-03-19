@@ -62,17 +62,52 @@ python3 -m doctest app/api/v1/tests.txt
 
 
 > **Note:** User, Place, Review and Amenity are now stored in the SQLite database configured in [config.py](config.py).
-pour créer la db local
-```python
-flask shell
->>> from app import db
->>> db.create_all()
-```
-et pour créer un utilisateur admin
-```python
-flask shell
->>> from app.services.facade import HBnBFacade
->>> facade = HBnBFacade()
->>> user = facade.create_user({'first_name':'John','last_name':'Doe','email':'john@example.com','password':'password'})
->>> print(user.id)
+
+
+```mermaid
+erDiagram
+	direction TB
+	User {
+		string id  "PK"  
+		string first_name  ""  
+		string last_name  ""  
+		string email  ""  
+		string password  ""  
+		boolean is_admin  ""  
+	}
+
+	Place {
+		string id  "PK"  
+		string title  ""  
+		string description  ""  
+		float price  ""  
+		float latitude  ""  
+		float longitude  ""  
+		string owner_id  "FK"  
+	}
+
+	Review {
+		string id  "PK"  
+		string text  ""  
+		int rating  ""  
+		string user_id  "FK"  
+		string place_id  "FK"  
+	}
+
+	Amenity {
+		string id  "PK"  
+		string name  ""  
+		string description  ""  
+	}
+
+	Place_Amenity {
+		string place_id  "PK, FK"  
+		string amenity_id  "PK, FK"  
+	}
+
+	User||--o{Place:"Has"
+	User||--o{Review:"Post"
+	Review}o--||Place:"About"
+	Place||--o{Place_Amenity:"has"
+	Amenity||--o{Place_Amenity:"is_linked_to"
 ```
