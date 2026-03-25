@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@layer base {
+	:root {
+		--color-bg: #ebecf1;
+		--color-surface: #ebecf1;
+		--color-gray: #94a3b8;
+		--color-light-gray: #dfe2e9;
+		--color-text: #373737;
+		--color-shadow-dark: #cbcbcb;
+		--color-shadow-light: #ffffff;
+		--color-accent-blue: #2d98da;
+		--color-accent-yellow: #f7b731;
+		--color-accent-green: #17a35a;
+		--radius-pill: 500px;
+		--radius-screen: 24px;
+		--shadow-neumorphic:
+			4.5px 4.5px 9px var(--color-shadow-dark),
+			-4.5px -4.5px 9px var(--color-shadow-light);
+		--shadow-neumorphic-inset:
+			inset 4px 4px 4px -2px var(--color-shadow-dark),
+			inset -4px -4px 4px -2px var(--color-shadow-light);
+		--shadow-screen-inset:
+			inset 1.5px 1.5px 3px var(--color-shadow-dark),
+			inset -1.5px -1.5px 3px var(--color-shadow-light);
+		--shadow-pressed:
+			inset 2px 2px 4px var(--color-shadow-dark),
+			inset -2px -2px 4px var(--color-shadow-light);
+	}
+
+	body {
+		background-color: var(--color-bg);
+		color: var(--color-text);
+	}
+}
+
+@layer components {
+	.screen {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-screen-inset);
+		border-radius: var(--radius-screen);
+		transition:
+			background-color 0.5s ease-in-out,
+			box-shadow 0.5s ease-in-out;
+	}
+
+	.neumorphic {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-neumorphic);
+		border-radius: var(--radius-screen);
+	}
+
+	.btn-neumorphic {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-neumorphic);
+		border-radius: var(--radius-pill);
+		@apply flex items-center justify-center cursor-pointer transition-all duration-300;
+	}
+
+	.neumorphic-inset {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-neumorphic-inset);
+		border-radius: var(--radius-pill);
+		@apply flex items-center justify-center transition-all duration-300;
+	}
+
+	.btn-neumorphic:active {
+		box-shadow: var(--shadow-pressed);
+		@apply scale-95;
+	}
+
+	.btn-neumorphic a {
+		color: var(--color-text);
+		@apply flex h-full w-full items-center justify-center no-underline font-bold;
+	}
+
+	.neumorphic-shadow {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-neumorphic);
+	}
+
+	.neumorphic-shadow-inset {
+		background-color: var(--color-surface);
+		box-shadow: var(--shadow-neumorphic-inset);
+	}
+
+	.neumorphic-rounded {
+		border-radius: var(--radius-pill);
+	}
+	
+	.icon-card {
+		box-shadow: 1px 1px 10px 2px rgba(0, 0, 0, 0.2);
+		border-radius: 1rem;
+	}
+	
+	.navbar {
+		background-color: var(--color-surface);
+		box-shadow: 3px 3px 9px 1px var(--color-shadow-dark);
+		border-radius: var(--radius-pill);
+	}
+}

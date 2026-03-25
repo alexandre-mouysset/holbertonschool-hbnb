@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "lucide": "^1.0.1",
+    "tailwindcss": "^4.2.2"
+  }
+}
