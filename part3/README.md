@@ -19,7 +19,16 @@ part3/
 ## Installation
 
 ```bash
+git clone https://github.com/ylabate/holbertonschool-hbnb.git
+cd holbertonschool-hbnb
 pip install -r requirement.txt
+```
+
+## Initialise the database with admin
+```bash
+mkdir instance
+cat schema.sql | sqlite3 instance/development.db
+cat seed.sql | sqlite3 instance/development.db
 ```
 
 ## Run the server
