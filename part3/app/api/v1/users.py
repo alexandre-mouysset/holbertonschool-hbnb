@@ -56,7 +56,6 @@ class UserList(Resource):
         """Retrieve all users"""
         return facade.get_all_user(), 200
 
-    @jwt_required()
     @api.doc(security="BearerAuth")
     @api.response(400, "Invalid input data")
     @api.response(201, "Account created successfully")
@@ -65,10 +64,7 @@ class UserList(Resource):
     @api.expect(user_model_register, validate=True)
     @api.marshal_with(user_model_response)
     def post(self):
-        """Create a new user (admin only)"""
-        claims = get_jwt()
-        if not claims.get("is_admin"):
-            api.abort(403, "Admin privileges required")
+        """Create a new user"""
 
         user_data = api.payload
         if facade.get_user_by_email(user_data["email"]):
