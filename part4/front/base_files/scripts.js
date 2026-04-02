@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:5000/api/v1';
+const API_BASE_URL = '/api/v1';
 const MAX_VISIBLE_CARDS = 8;
 const TOKEN_STORAGE_KEYS = ['access_token', 'token', 'jwt', 'jwt_token', 'authToken'];
 const EXPIRED_TOKEN_NOTICE_KEY = 'hbnb_token_expired_notice';

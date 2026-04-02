@@ -1,4 +1,6 @@
-from flask import Flask
+import os
+
+from flask import Flask, abort, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
 from flask_bcrypt import Bcrypt
@@ -17,7 +19,12 @@ def create_app(config_class="config.DevelopmentConfig"):
     from app.api.v1.reviews import api as reviews_ns
     from app.api.v1.auth import api as auth_ns
 
-    app = Flask(__name__)
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    )
+    frontend_dir = os.path.join(project_root, "front", "base_files")
+
+    app = Flask(__name__, static_folder=frontend_dir, static_url_path="")
     CORS(app)
     app.config.from_object(config_class)
     bcrypt.init_app(app)
@@ -37,7 +44,7 @@ def create_app(config_class="config.DevelopmentConfig"):
         version="1.0",
         title="HBnB API",
         description="HBnB Application API",
-        doc="/",
+        doc="/api",
         authorizations=authorizations,
         security='BearerAuth'
     )
@@ -47,4 +54,25 @@ def create_app(config_class="config.DevelopmentConfig"):
     api.add_namespace(place_ns, path="/api/v1/places")
     api.add_namespace(reviews_ns, path="/api/v1/reviews")
     api.add_namespace(auth_ns, path="/api/v1/auth")
+
+    @app.get("/")
+    def serve_index():
+        return app.send_static_file("index.html")
+
+    # Flask-RESTX also registers '/' as endpoint 'root';
+    # force it to serve frontend homepage.
+    if "root" in app.view_functions:
+        app.view_functions["root"] = serve_index
+
+    @app.get("/<path:asset_path>")
+    def serve_front_asset(asset_path):
+        if asset_path.startswith("api/"):
+            abort(404)
+
+        full_path = os.path.join(frontend_dir, asset_path)
+        if os.path.isfile(full_path):
+            return send_from_directory(frontend_dir, asset_path)
+
+        abort(404)
+
     return app

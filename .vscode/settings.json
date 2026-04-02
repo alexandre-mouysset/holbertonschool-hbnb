@@ -4,5 +4,6 @@
   "scss.lint.unknownAtRules": "ignore",
   "scss.lint.propertyIgnoredDueToDisplay": "ignore",
   "less.lint.unknownAtRules": "ignore",
-  "less.lint.propertyIgnoredDueToDisplay": "ignore"
+  "less.lint.propertyIgnoredDueToDisplay": "ignore",
+  "semistandard.enable": false
 }
