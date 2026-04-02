@@ -53,7 +53,7 @@
     </header>
     <main>
         <h1 class="h1">Discover Places</h1>
-        <section id="filter" class="filter-bar">
+        <div id="filter" class="filter-bar">
             <label for="price-filter" class="filter-label">Max Price:</label>
             <select id="price-filter" class="filter-select">
                 <option value="All">All</option>
@@ -61,10 +61,10 @@
                 <option value="50">50</option>
                 <option value="100">100</option>
             </select>
-        </section>
-        <section id="places-list" class="grid grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto mt-6 mb-8 px-4">
+        </div>
+        <div id="places-list" class="grid grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto mt-6 mb-8 px-4">
             <!-- Cards are rendered dynamically by scripts.js -->
-        </section>
+        </div>
 
         <section class="auth-shell">
             <form id="create-place-form" class="auth-card">

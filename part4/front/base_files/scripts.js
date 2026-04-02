@@ -1,4 +1,48 @@
-const API_BASE_URL = '/api/v1';
+const API_BASE_STORAGE_KEY = 'hbnb_api_base_url';
+const DEFAULT_LOCAL_API_BASE_URL = 'http://127.0.0.1:5000/api/v1';
+
+function sanitizeApiBaseUrl(rawValue) {
+  if (typeof rawValue !== 'string') {
+    return '';
+  }
+
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  return trimmed.replace(/\/+$/, '');
+}
+
+function resolveApiBaseUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const apiBaseFromQuery = sanitizeApiBaseUrl(params.get('api_base'));
+
+  if (apiBaseFromQuery) {
+    try {
+      window.localStorage.setItem(API_BASE_STORAGE_KEY, apiBaseFromQuery);
+    } catch (error) {
+      // Ignore storage errors.
+    }
+  }
+
+  let apiBaseFromStorage = '';
+  try {
+    apiBaseFromStorage = sanitizeApiBaseUrl(
+      window.localStorage.getItem(API_BASE_STORAGE_KEY)
+    );
+  } catch (error) {
+    apiBaseFromStorage = '';
+  }
+
+  if (window.location.protocol === 'file:') {
+    return apiBaseFromQuery || apiBaseFromStorage || DEFAULT_LOCAL_API_BASE_URL;
+  }
+
+  return apiBaseFromQuery || '/api/v1';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 const MAX_VISIBLE_CARDS = 8;
 const TOKEN_STORAGE_KEYS = ['access_token', 'token', 'jwt', 'jwt_token', 'authToken'];
 const EXPIRED_TOKEN_NOTICE_KEY = 'hbnb_token_expired_notice';
@@ -354,6 +398,23 @@ function clearAuthData() {
     window.sessionStorage.removeItem(key);
     document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   });
+}
+
+function storeAuthToken(rawToken) {
+  const token = normalizeToken(rawToken);
+  if (!token) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem('access_token', token);
+    window.sessionStorage.setItem('access_token', token);
+  } catch (error) {
+    // Ignore storage errors.
+  }
+
+  document.cookie = `token=${token}; path=/`;
+  document.cookie = `access_token=${token}; path=/`;
 }
 
 function escapeHtml(value) {
@@ -1558,9 +1619,30 @@ async function initMyPlacesPage() {
 
     myPlaces.forEach((place) => {
       const card = createMyPlaceCard(place, async (placeId) => {
+        if (!getAuthToken()) {
+          alert('Your session is missing or expired. Please login again.');
+          window.location.href = 'login.html';
+          return;
+        }
+
         const response = await deletePlace(placeId);
         if (!response.ok) {
           const errorText = await response.text();
+
+          if (response.status === 401) {
+            clearAuthData();
+            alert('Session expired. Please login again.');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          if (response.status === 403) {
+            alert(
+              `Delete failed: you must be the owner (or admin). ${errorText}`
+            );
+            return;
+          }
+
           alert(`Delete failed: ${errorText}`);
           return;
         }
@@ -1869,7 +1951,7 @@ function initLoginPage() {
 
         if (response.ok) {
           const data = await response.json();
-          document.cookie = `token=${data.access_token}; path=/`;
+          storeAuthToken(data.access_token);
           window.location.href = 'index.html';
         } else {
           alert(`Login failed: ${response.statusText}`);
