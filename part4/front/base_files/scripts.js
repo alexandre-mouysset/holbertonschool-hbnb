@@ -289,6 +289,17 @@ async function updateUserIdentityDisplay() {
 
   try {
     const user = userId ? await loadUserById(userId) : null;
+
+    if (userId && !user) {
+      clearAuthData();
+      identityNodes.forEach((node) => {
+        node.classList.add('hidden');
+        node.textContent = '';
+      });
+      updateLoginLinkVisibility();
+      return;
+    }
+
     const name = formatUserName(user, userId || 'connected-user');
 
     identityNodes.forEach((node) => {
@@ -1233,7 +1244,7 @@ async function loadUserById(userId) {
 // Build a display name from user payload
 function formatUserName(user, userId) {
   if (!user) {
-    return `User ${userId || '-'}`;
+    return 'Connected user';
   }
 
   const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
@@ -1241,7 +1252,7 @@ function formatUserName(user, userId) {
     return fullName;
   }
 
-  return user.email || `User ${userId || '-'}`;
+  return user.email || 'Connected user';
 }
 
 async function resolveHostName(userId) {
