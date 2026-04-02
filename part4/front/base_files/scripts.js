@@ -305,6 +305,11 @@ function updateLoginLinkVisibility() {
     link.classList.toggle('hidden', !isAuthenticated);
   });
 
+  const createPlaceShell = document.getElementById('create-place-shell');
+  if (createPlaceShell) {
+    createPlaceShell.hidden = !isAuthenticated;
+  }
+
   updateUserIdentityDisplay();
 }
 
