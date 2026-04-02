@@ -306,8 +306,16 @@ function updateLoginLinkVisibility() {
   });
 
   const createPlaceShell = document.getElementById('create-place-shell');
-  if (createPlaceShell) {
-    createPlaceShell.hidden = !isAuthenticated;
+  const createPlaceForm = document.getElementById('create-place-form');
+  const createPlaceLoginHint = document.getElementById('create-place-login-hint');
+
+  if (createPlaceShell && createPlaceForm) {
+    createPlaceShell.hidden = false;
+    createPlaceForm.hidden = !isAuthenticated;
+
+    if (createPlaceLoginHint) {
+      createPlaceLoginHint.classList.toggle('hidden', isAuthenticated);
+    }
   }
 
   updateUserIdentityDisplay();
