@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Places</title>
+    <link rel="preload" as="image" href="images/plage.jpg">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="./images/icon.png">
+</head>
+
+<body class="page-bg">
+    <header class="header">
+        <nav class="nav">
+            <!-- Gauche -->
+            <div class="flex justify-center sm:justify-start sm:flex-1">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo">
+                </a>
+            </div>
+
+            <!-- Centre -->
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 sm:flex-1">
+                <a href="place.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Places
+                </a>
+
+                <a href="add_review.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Review
+                </a>
+
+                <a href="my_places.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base my-places-link hidden">
+                    My places
+                </a>
+            </div>
+
+            <!-- Droite -->
+            <div class="flex flex-col items-center sm:items-end gap-2 sm:flex-1">
+                <a href="login.html" class="login-button login-link">
+                    Login
+                </a>
+                <a href="#" class="login-button logout-link ml-3 hidden">
+                    Logout
+                </a>
+                <p class="user-identity place-info hidden"></p>
+            </div>
+
+        </nav>
+    </header>
+    <main>
+        <h1 class="h1">Discover Places</h1>
+        <section id="filter" class="filter-bar">
+            <label for="price-filter" class="filter-label">Max Price:</label>
+            <select id="price-filter" class="filter-select">
+                <option value="All">All</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </section>
+        <section id="places-list" class="grid grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto mt-6 mb-8 px-4">
+            <!-- Cards are rendered dynamically by scripts.js -->
+        </section>
+
+        <section class="auth-shell">
+            <form id="create-place-form" class="auth-card">
+                <h2 class="h2-card">Create a New Place</h2>
+
+                <label for="place-title" class="place-info">Title</label>
+                <input type="text" id="place-title" class="auth-field" required>
+
+                <label for="place-description" class="place-info">Description</label>
+                <textarea id="place-description" class="auth-field" required></textarea>
+
+                <label for="place-price" class="place-info">Price per night</label>
+                <input type="number" id="place-price" class="auth-field" min="0.01" step="0.01" required>
+
+                <label for="place-latitude" class="place-info">Latitude</label>
+                <input type="number" id="place-latitude" class="auth-field" min="-90" max="90" step="0.0001" required>
+
+                <label for="place-longitude" class="place-info">Longitude</label>
+                <input type="number" id="place-longitude" class="auth-field" min="-180" max="180" step="0.0001" required>
+
+                <label for="place-amenities" class="place-info">Amenities IDs (comma separated)</label>
+                <input type="text" id="place-amenities" class="auth-field" placeholder="id1,id2,id3">
+
+                <button type="submit" class="details-button">Create Place</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <hr>
+        <p>&copy; 2026 HBnB. All rights reserved.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+
+</html>

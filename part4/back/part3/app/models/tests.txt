@@ -1,0 +1,89 @@
+>>> from app import create_app, db
+>>> from app.models.amenity import Amenity
+>>> from app.models.place import Place
+>>> from app.models.review import Review
+>>> from app.models.user import User
+>>> app = create_app()
+>>> ctx = app.app_context()
+>>> ctx.push()
+>>> db.drop_all()
+>>> db.create_all()
+
+# User persisted with SQLAlchemy
+>>> owner = User(
+...     first_name="Alice",
+...     last_name="Smith",
+...     email="alice@example.com",
+...     password="password123",
+... )
+>>> db.session.add(owner)
+>>> db.session.commit()
+>>> owner.id is not None
+True
+
+# Amenity model and validation
+>>> amenity = Amenity(name="WiFi", description="High speed internet")
+>>> db.session.add(amenity)
+>>> db.session.commit()
+>>> amenity.name
+'WiFi'
+>>> amenity.description
+'High speed internet'
+
+# Place model and transient amenities list
+>>> place = Place(
+...     title="Cozy Apartment",
+...     description="Near city center",
+...     price="100",
+...     latitude=40.7128,
+...     longitude=-74.0060,
+...     user_id=owner.id,
+... )
+>>> place.add_amenity(amenity.id)
+>>> db.session.add(place)
+>>> db.session.commit()
+>>> place.price
+100.0
+>>> len(place.amenities)
+1
+>>> place.amenities[0] == amenity.id
+True
+>>> place.user_id == owner.id
+True
+
+# Review model and alias comment
+>>> review = Review(text="Great place!", rating=5, user_id=owner.id, place_id=place.id)
+>>> db.session.add(review)
+>>> db.session.commit()
+>>> review.comment
+'Great place!'
+>>> review.rating
+5
+
+# Validation errors
+>>> try:
+...     Amenity(name="", description="bad")
+... except ValueError as e:
+...     print(e)
+name is required
+
+>>> try:
+...     Place(
+...         title="Test",
+...         description="Desc",
+...         price=-10.0,
+...         latitude=0.0,
+...         longitude=0.0,
+...         user_id=owner.id,
+...     )
+... except ValueError as e:
+...     print(e)
+price must be a positive value
+
+>>> try:
+...     Review(text="Good", rating=6, user_id=owner.id, place_id=place.id)
+... except ValueError as e:
+...     print(e)
+rating must be between 1 and 5
+
+>>> ctx.pop()

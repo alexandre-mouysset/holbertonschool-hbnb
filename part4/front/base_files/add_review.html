@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Review</title>
+    <link rel="preload" as="image" href="images/plage.jpg">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="./images/icon.png">
+</head>
+
+<body id="add-review-page" class="page-bg">
+    <header class="header">
+        <nav class="nav">
+            <div class="flex justify-center sm:justify-start sm:flex-1">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo">
+                </a>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 sm:flex-1">
+                <a href="index.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Home
+                </a>
+                <a href="place.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Places
+                </a>
+                <a href="my_places.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base my-places-link hidden">
+                    My places
+                </a>
+            </div>
+
+            <div class="flex flex-col items-center sm:items-end gap-2 sm:flex-1">
+                <a href="login.html" class="login-button login-link">
+                    Login
+                </a>
+                <a href="#" class="login-button logout-link ml-3 hidden">
+                    Logout
+                </a>
+                <p class="user-identity place-info hidden"></p>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="h1">Add a Review</h1>
+
+        <section class="auth-shell">
+            <form id="review-form" class="auth-card">
+                <h2 class="h2-card">Submit Your Review</h2>
+
+                <label for="review-place-id" class="place-info">Place ID</label>
+                <input type="text" id="review-place-id" class="auth-field" placeholder="Paste place id" required>
+
+                <p id="review-place-hint" class="place-info">Enter a place id to post your review.</p>
+
+                <label for="review-text" class="place-info">Your review</label>
+                <textarea id="review-text" class="auth-field" required></textarea>
+
+                <label for="review-rating" class="place-info">Rating</label>
+                <select id="review-rating" class="auth-field" required>
+                    <option value="5">★★★★★ (5)</option>
+                    <option value="4">★★★★☆ (4)</option>
+                    <option value="3">★★★☆☆ (3)</option>
+                    <option value="2">★★☆☆☆ (2)</option>
+                    <option value="1">★☆☆☆☆ (1)</option>
+                </select>
+
+                <button type="submit" class="details-button">Submit Review</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>

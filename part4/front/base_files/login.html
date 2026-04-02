@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="preload" as="image" href="images/plage.jpg">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="./images/icon.png">
+</head>
+
+<body class="page-bg">
+    <header class="header">
+        <nav class="nav">
+            <div class="flex justify-center sm:justify-start sm:flex-1">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo">
+                </a>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 sm:flex-1">
+                <a href="index.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Home
+                </a>
+                <a href="signup.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Sign Up
+                </a>
+                <a href="my_places.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base my-places-link hidden">
+                    My places
+                </a>
+            </div>
+
+            <div class="flex flex-col items-center sm:items-end gap-2 sm:flex-1">
+                <a href="login.html" class="login-button login-link">
+                    Login
+                </a>
+                <a href="#" class="login-button logout-link ml-3 hidden">
+                    Logout
+                </a>
+                <p class="user-identity place-info hidden"></p>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="h1">Welcome Back</h1>
+        <section class="auth-shell">
+            <form id="login-form" class="auth-card">
+                <h2 class="h2-card">Login</h2>
+
+                <label for="email" class="place-info">Email</label>
+                <input type="email" id="email" name="email" class="auth-field" required>
+
+                <label for="password" class="place-info">Password</label>
+                <input type="password" id="password" name="password" class="auth-field" required>
+
+                <button type="submit" class="details-button">Login</button>
+
+                <p class="place-info">No account yet?
+                    <a href="signup.html" class="auth-link">Create one</a>
+                </p>
+            </form>
+        </section>
+    </main>
+    <script src="scripts.js"></script>
+</body>
+
+</html>

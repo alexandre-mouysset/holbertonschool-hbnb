@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Places</title>
+    <link rel="preload" as="image" href="images/plage.jpg">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="./images/icon.png">
+</head>
+
+<body class="page-bg">
+    <header class="header">
+        <nav class="nav">
+            <div class="flex justify-center sm:justify-start sm:flex-1">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo">
+                </a>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 sm:flex-1">
+                <a href="index.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Home
+                </a>
+                <a href="place.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Places
+                </a>
+                <a href="add_review.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base">
+                    Review
+                </a>
+                <a href="my_places.html"
+                    class="px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base my-places-link hidden">
+                    My places
+                </a>
+            </div>
+
+            <div class="flex flex-col items-center sm:items-end gap-2 sm:flex-1">
+                <a href="login.html" class="login-button login-link">
+                    Login
+                </a>
+                <a href="#" class="login-button logout-link ml-3 hidden">
+                    Logout
+                </a>
+                <p class="user-identity place-info hidden"></p>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="h1">My Places</h1>
+
+        <section id="my-places-list" class="max-w-5xl mx-auto px-4">
+            <!-- My places list rendered dynamically -->
+        </section>
+    </main>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>

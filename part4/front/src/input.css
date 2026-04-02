@@ -1,0 +1,92 @@
+@import "tailwindcss";
+@source "../base_files/*.html";
+@source "../base_files/*.js";
+
+@layer components {
+	.header {
+		@apply bg-[#E0FFFF] p-10 relative z-10
+	}
+	.nav {
+		@apply flex flex-col sm:flex-row sm:items-center w-full px-4 text-xl gap-4
+	}
+	.h1 {
+		@apply mt-8 px-4 text-center text-4xl sm:text-5xl font-extrabold tracking-wide text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)]
+	}
+	.page-bg {
+		@apply min-h-screen relative;
+		background-color: #0a4f62;
+		isolation: isolate;
+	}
+	.page-bg::before {
+		content: "";
+		position: fixed;
+		left: -10vw;
+		top: -10vh;
+		width: 120vw;
+		height: 120vh;
+		background-image: url('images/plage.jpg');
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		transform: translateZ(0);
+		will-change: transform;
+		backface-visibility: hidden;
+		pointer-events: none;
+		z-index: -1;
+	}
+	.filter-bar {
+		@apply mx-auto mt-6 flex w-full max-w-7xl items-center justify-center sm:justify-end gap-3 px-4;
+	}
+	.filter-label {
+		@apply rounded-md bg-slate-900/55 px-3 py-2 text-sm font-semibold text-cyan-100 backdrop-blur-sm;
+	}
+	.filter-select {
+		@apply rounded-lg border border-cyan-200/80 bg-white/90 px-3 py-2 text-sm font-medium text-slate-800 shadow-md outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300;
+	}
+	.login-button {
+		@apply px-4 py-2 bg-amber-400 border border-amber-500 text-white rounded-lg hover:bg-amber-500 transition shadow-md text-sm sm:text-base;
+	}
+	.logo {
+		@apply h-12
+	}
+	.place-card {
+		@apply m-5 p-2.5 border border-[#ddd] rounded-[10px] bg-cover bg-center text-white min-h-56 flex flex-col justify-end shadow-lg;
+		background-image: linear-gradient(160deg, rgba(6, 38, 57, 0.84), rgba(6, 38, 57, 0.62)), var(--card-image, url('images/place-1.jpg'));
+	}
+	.review-card {
+		@apply m-5 p-2.5 border border-[#ddd] rounded-[10px] bg-slate-900/55 text-cyan-50 backdrop-blur-sm;
+	}
+	.place-details {
+		@apply max-w-5xl mx-auto;
+	}
+	.place-carousel {
+		@apply mx-auto flex w-full max-w-7xl items-center justify-center gap-3 px-4;
+	}
+	.place-nav-button {
+		@apply h-10 w-10 shrink-0 rounded-full border border-cyan-300 bg-cyan-200/85 text-xl font-bold text-cyan-800 transition hover:bg-cyan-100;
+	}
+	.place-info {
+		@apply mt-2 text-sm sm:text-base text-cyan-100;
+	}
+	.h2-card {
+		@apply text-xl font-bold;
+	}
+	.details-button {
+		@apply mt-4 inline-block w-fit px-4 py-2 bg-cyan-300 border border-cyan-400 text-cyan-700 rounded-lg hover:bg-cyan-200 transition shadow-sm text-sm sm:text-base;
+	}
+	.auth-shell {
+		@apply mx-auto w-full max-w-xl px-4 pb-8;
+	}
+	.auth-card {
+		@apply m-5 p-2.5 border border-[#ddd] rounded-[10px] bg-slate-900/55 text-cyan-50 backdrop-blur-sm flex flex-col gap-2;
+	}
+	.auth-field {
+		@apply rounded-lg border border-[#ddd] bg-white/90 p-2 text-slate-800;
+	}
+	.auth-link {
+		@apply text-cyan-200 underline hover:text-cyan-100;
+	}
+	.places-empty {
+		@apply col-span-2 lg:col-span-4 rounded-xl bg-slate-900/60 p-6 text-center text-cyan-100 backdrop-blur-sm;
+	}
+}
