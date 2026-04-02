@@ -39,6 +39,19 @@ def create_app(config_class="config.DevelopmentConfig"):
     with app.app_context():
         db.create_all()
 
+        if Amenity.query.count() == 0:
+            db.session.add_all(
+                [
+                    Amenity(name="WiFi", description="Wireless internet"),
+                    Amenity(name="Swimming Pool", description="Outdoor pool"),
+                    Amenity(
+                        name="Air Conditioning",
+                        description="Cooling system"
+                    ),
+                ]
+            )
+            db.session.commit()
+
     authorizations = {
         'BearerAuth': {
             'type': 'apiKey',
