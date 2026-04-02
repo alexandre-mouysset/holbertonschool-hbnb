@@ -4,7 +4,7 @@
 
 @layer components {
 	.header {
-		@apply bg-[#E0FFFF] p-10 relative z-10
+		@apply bg-[#E0FFFF] p-5 relative z-10
 	}
 	.nav {
 		@apply flex flex-col sm:flex-row sm:items-center w-full px-4 text-xl gap-4
