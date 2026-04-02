@@ -2,6 +2,10 @@
 
 HBnB fullstack school project (Flask REST API + static frontend) for Holberton School.
 
+## Live Demo
+
+- https://holbertonschool-hbnb.onrender.com/
+
 This repository contains multiple milestones (`part1` to `part4`) and the most complete runnable stack in `part4`:
 - Backend API: `part4/back/part3`
 - Frontend: `part4/front/base_files`

@@ -13,6 +13,11 @@ db = SQLAlchemy()
 
 
 def create_app(config_class="config.DevelopmentConfig"):
+    from app.models.amenity import Amenity  # noqa: F401
+    from app.models.place import Place  # noqa: F401
+    from app.models.review import Review  # noqa: F401
+    from app.models.user import User  # noqa: F401
+
     from app.api.v1.users import api as users_ns
     from app.api.v1.amenities import api as amenities_ns
     from app.api.v1.places import api as place_ns
@@ -30,6 +35,10 @@ def create_app(config_class="config.DevelopmentConfig"):
     bcrypt.init_app(app)
     jwt.init_app(app)
     db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+
     authorizations = {
         'BearerAuth': {
             'type': 'apiKey',
