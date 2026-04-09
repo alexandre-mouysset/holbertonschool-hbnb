@@ -33,7 +33,13 @@ class Place(BaseModel):
         lazy="dynamic"
     )
     owner = db.relationship("User", back_populates="places")
-    reviews = db.relationship("Review", back_populates="place", lazy="dynamic")
+    # Delete related reviews when a place is removed.
+    reviews = db.relationship(
+        "Review",
+        back_populates="place",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     def add_review(self, review):
         self.reviews.append(review)

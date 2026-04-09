@@ -77,6 +77,9 @@
 	.auth-shell {
 		@apply mx-auto w-full max-w-xl px-4 pb-8;
 	}
+	#create-place-login-hint {
+		@apply mt-5 rounded-xl border-2 border-amber-500 bg-amber-100/95 px-4 py-3 text-center text-base sm:text-lg font-extrabold tracking-wide text-slate-900 shadow-lg;
+	}
 	.auth-card {
 		@apply m-5 p-2.5 border border-[#ddd] rounded-[10px] bg-slate-900/55 text-cyan-50 backdrop-blur-sm flex flex-col gap-2;
 	}

@@ -292,6 +292,7 @@ function updateLoginLinkVisibility() {
   }
 
   const isAuthenticated = isAuthenticatedByCookie();
+  const isAdmin = isCurrentUserAdminFromToken();
 
   loginLinks.forEach((link) => {
     link.classList.toggle('hidden', isAuthenticated);
@@ -303,6 +304,7 @@ function updateLoginLinkVisibility() {
 
   myPlacesLinks.forEach((link) => {
     link.classList.toggle('hidden', !isAuthenticated);
+    link.textContent = isAdmin ? 'All User Places' : 'My places';
   });
 
   const createPlaceShell = document.getElementById('create-place-shell');
@@ -672,10 +674,72 @@ function parseAmenitiesInput(value) {
     return [];
   }
 
+  const resolveAmenityId = (rawToken) => {
+    const token = String(rawToken || '').trim();
+    if (!token) {
+      return '';
+    }
+
+    if (/^[0-9a-fA-F-]{36}$/.test(token)) {
+      return token;
+    }
+
+    const loweredToken = token.toLowerCase();
+    for (const [amenityId, amenityName] of AMENITY_NAME_BY_ID.entries()) {
+      if (String(amenityName || '').trim().toLowerCase() === loweredToken) {
+        return amenityId;
+      }
+    }
+
+    return '';
+  };
+
   return value
     .split(',')
     .map((item) => item.trim())
+    .map((item) => resolveAmenityId(item))
     .filter(Boolean);
+}
+
+function getAmenityDisplayName(amenityId) {
+  const id = String(amenityId || '').trim();
+  if (!id) {
+    return '';
+  }
+
+  return AMENITY_NAME_BY_ID.get(id) || id;
+}
+
+function formatAmenitiesForForm(amenities) {
+  if (!Array.isArray(amenities) || !amenities.length) {
+    return '';
+  }
+
+  const labels = amenities
+    .map((amenity) => {
+      if (typeof amenity === 'string') {
+        const parsedIds = parseAmenitiesInput(amenity);
+        if (parsedIds.length) {
+          return getAmenityDisplayName(parsedIds[0]);
+        }
+        return amenity.trim();
+      }
+
+      if (amenity && typeof amenity === 'object') {
+        if (amenity.name) {
+          return String(amenity.name).trim();
+        }
+
+        if (amenity.id) {
+          return getAmenityDisplayName(amenity.id);
+        }
+      }
+
+      return '';
+    })
+    .filter(Boolean);
+
+  return [...new Set(labels)].join(', ');
 }
 
 async function loadAmenitiesCatalog() {
@@ -722,7 +786,9 @@ function styleAmenityButton(button, isSelected) {
 }
 
 function updateAmenitiesInputValue(input, selectedIds) {
-  input.value = Array.from(selectedIds).join(',');
+  input.value = Array.from(selectedIds)
+    .map((amenityId) => getAmenityDisplayName(amenityId))
+    .join(', ');
 }
 
 async function setupAmenitiesPicker(form, inputId) {
@@ -1475,8 +1541,8 @@ function renderUpdatePlaceSection(place) {
       <label for="update-place-longitude" class="place-info">Longitude</label>
       <input type="number" id="update-place-longitude" class="auth-field" min="-180" max="180" step="0.0001" value="${Number(place.longitude) || 0}" required>
 
-      <label for="update-place-amenities" class="place-info">Amenities IDs (comma separated)</label>
-      <input type="text" id="update-place-amenities" class="auth-field" value="${escapeHtml((place.amenities || []).map((a) => (typeof a === 'string' ? a : a.id || '')).filter(Boolean).join(','))}">
+      <label for="update-place-amenities" class="place-info">Amenities (comma separated)</label>
+      <input type="text" id="update-place-amenities" class="auth-field" value="${escapeHtml(formatAmenitiesForForm(place.amenities || []))}" placeholder="WiFi, Swimming Pool, Air Conditioning">
 
       <button type="submit" class="details-button">Update Place</button>
     </form>
@@ -1491,6 +1557,15 @@ function initCreatePlaceForm() {
   const form = document.getElementById('create-place-form');
   if (!form || form.dataset.bound === 'true') {
     return;
+  }
+
+  const amenitiesLabel = form.querySelector('label[for="place-amenities"]');
+  const amenitiesInput = form.querySelector('#place-amenities');
+  if (amenitiesLabel) {
+    amenitiesLabel.textContent = 'Amenities (comma separated)';
+  }
+  if (amenitiesInput) {
+    amenitiesInput.placeholder = 'WiFi, Swimming Pool, Air Conditioning';
   }
 
   setupAmenitiesPicker(form, 'place-amenities');
@@ -1606,15 +1681,26 @@ async function initMyPlacesPage() {
   }
 
   const currentUserId = getCurrentUserIdFromToken();
+  const isAdmin = isCurrentUserAdminFromToken();
   if (!currentUserId) {
     window.location.href = 'index.html';
     return;
   }
 
+  const pageTitle = document.querySelector('main .h1');
+  if (pageTitle) {
+    pageTitle.textContent = isAdmin ? 'All User Places' : 'My Places';
+  }
+
   let myPlaces = [];
   try {
     const allPlaces = await loadPlaces();
-    myPlaces = allPlaces.filter((place) => String(place.user_id) === String(currentUserId));
+    const realPlaces = allPlaces.filter(
+      (place) => !String(place.id || '').startsWith('demo-')
+    );
+    myPlaces = isAdmin
+      ? realPlaces
+      : realPlaces.filter((place) => String(place.user_id) === String(currentUserId));
   } catch (error) {
     myPlaces = [];
   }
@@ -1625,7 +1711,9 @@ async function initMyPlacesPage() {
     if (!myPlaces.length) {
       const empty = document.createElement('article');
       empty.className = 'auth-card';
-      empty.textContent = 'You have not created places yet.';
+      empty.textContent = isAdmin
+        ? 'No user-created places available yet.'
+        : 'You have not created places yet.';
       container.appendChild(empty);
       return;
     }
